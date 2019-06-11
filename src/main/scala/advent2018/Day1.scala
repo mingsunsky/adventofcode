@@ -19,12 +19,7 @@ trait Day1 {
   def part2(data: Seq[String]): Int = {
     val d1 = data.map(_.toInt)
     val d2: Stream[Int] = Stream.continually(d1.toStream).flatten
-    val d3: Stream[(Int, Set[Int])] = d2.scanLeft((0, Set[Int]()))((a, b) => {
-      val x = a._1 + b
-      val y = a._2 + a._1
-      (x, y)
-    })
-
+    val d3: Stream[(Int, Set[Int])] = d2.scanLeft((0, Set[Int]())){case((sum, list), e) => (sum + e, list + sum)}
     val d4 = d3.dropWhile(e => !e._2.contains(e._1))
     d4.head._1
   }
