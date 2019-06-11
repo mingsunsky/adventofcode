@@ -17,11 +17,10 @@ trait Day1 {
   def part1(data: Seq[String]): Int =  data.foldLeft(0)((sum, v) => sum + v.toInt)
 
   def part2(data: Seq[String]): Int = {
-    val d1 = data.map(_.toInt)
-    val d2: Stream[Int] = Stream.continually(d1.toStream).flatten
-    val d3: Stream[(Int, Set[Int])] = d2.scanLeft((0, Set[Int]())){case((sum, list), e) => (sum + e, list + sum)}
-    val d4 = d3.dropWhile(e => !e._2.contains(e._1))
-    d4.head._1
+    Stream.continually(data.map(_.toInt).toStream).flatten
+      .scanLeft((0, Set[Int]())){case((sum, list), e) => (sum + e, list + sum)}
+      .dropWhile(e => !e._2.contains(e._1))
+      .head._1
   }
 
 }
