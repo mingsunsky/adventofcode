@@ -18,9 +18,10 @@ trait Day1 {
 
   def part2(data: Seq[String]): Int = {
     Stream.continually(data.map(_.toInt).toStream).flatten
-      .scanLeft((0, Set[Int]())){case((sum, list), e) => (sum + e, list + sum)}
-      .dropWhile(e => !e._2.contains(e._1))
-      .head._1
+      .scanLeft((0, Set[Int]())){ case((sum, list), e) => (sum + e, list + sum) }
+      .find { case(sum, list) => list.contains(sum) }
+      .map{ case (sum, _) => sum }
+      .get
   }
 
 }
