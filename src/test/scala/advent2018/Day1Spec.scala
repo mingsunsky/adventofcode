@@ -1,6 +1,9 @@
 package advent2018
+
 import org.scalatest.{FlatSpec, Matchers}
 import Day1.{part1, part2}
+
+import scala.io.Source
 
 class Day1Spec extends FlatSpec with Matchers {
 
@@ -15,6 +18,11 @@ class Day1Spec extends FlatSpec with Matchers {
     part2(List("+3", "+3", "+4", "-2", "-4")) shouldEqual 10
     part2(List("-6", "+3", "+8", "+5", "-6")) shouldEqual 5
     part2(List("+7", "+7", "-2", "-7", "-4")) shouldEqual 14
+  }
+
+  "test" should "" in {
+    val data = Source.fromResource("Day1").getLines().toSeq
+    println(part2(data))
   }
 
 }
