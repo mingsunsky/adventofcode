@@ -1,6 +1,6 @@
 package advent2018
 import org.scalatest.{FlatSpec, Matchers}
-import Day2.{find, numberOfDifferences}
+import Day2.{find, numberOfDifferences, commonLetters}
 
 class Day2Spec extends FlatSpec with Matchers {
 
@@ -19,9 +19,8 @@ class Day2Spec extends FlatSpec with Matchers {
     numberOfDifferences("fghij", "fguij") shouldEqual 1
   }
 
-//  "part1" should "pass read data test" in {
-//    import scala.io.Source
-//    val data = Source.fromResource("Day2").getLines().toSeq
-//    part1(data) shouldEqual 4693
-//  }
+  "part2" should "find common letters" in {
+    commonLetters("abcde", "axcye") shouldEqual "ace"
+    commonLetters("fghij", "fguij") shouldEqual "fgij"
+  }
 }
