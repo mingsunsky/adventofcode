@@ -19,15 +19,10 @@ trait Day2 {
   }
 
   def part2(lines: Seq[String]) = {
-    val result= for {
-      l1 <- lines
-      l2 <- lines.takeRight(lines.indexOf(l1))
-        if (numberOfDifferences(l1, l2) == 1)
-    } yield (l1, l2)
-
-    result
-      .map { case (a, b) => commonLetters(a, b)}
-      .head
+    lines.combinations(2)
+      .filter{ case Seq(a, b) => numberOfDifferences(a, b) == 1}
+      .map { case Seq(a, b) => commonLetters(a, b)}
+      .next()
   }
 
   def numberOfDifferences(s1: String, s2: String): Int = {
