@@ -9,6 +9,9 @@ object Day3 extends App with Day3 {
   val data = Source.fromResource("Day3").getLines().toSeq
   println(part1(data))
 
+  //Part2
+  println(part2(data))
+
 }
 
 
@@ -28,6 +31,15 @@ trait Day3 {
     data.map(parseLine)
       .foldLeft(Array.ofDim[Int](1000, 1000))(fillArray)
       .flatten.count(_>1)
+  }
+
+  def part2(data: Seq[String]): Int = {
+    val claims = data.map(parseLine)
+    val fabric = claims.foldLeft(Array.ofDim[Int](1000, 1000))(fillArray)
+    claims.find(
+      _.toPixels
+      .count{ case (x, y) => fabric(y)(x) > 1} == 0
+    ).get.id
   }
 
 }
