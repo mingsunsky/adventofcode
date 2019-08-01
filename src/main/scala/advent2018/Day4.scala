@@ -10,7 +10,7 @@ case object WakeUp extends Event {val value = "wakes up"}
 
 case class EventLog (date: LocalDateTime, id: Int, event: Event)
 
-case class Shift (id: Int, sleeps: Array[Int]) {
+case class Shift (id: Option[Int], sleeps: Array[Int]) {
   override def toString: String = s"$id " + sleeps.mkString
 }
 
@@ -19,7 +19,6 @@ object Day4Solution extends Day4 with App {
   //Part1
   val data = Source.fromResource("Day4").getLines().toSeq
   println(part1(data))
-
 
   //Part2
   println(part2(data))
@@ -34,7 +33,7 @@ trait Day4 {
     val sleeps = shifts(guardId).sleeps
     val maxMinute = sleeps.max
     val minute = sleeps.indexWhere(_ == maxMinute)
-    guardId * minute
+    guardId.fold(0)(_ * minute)
   }
 
   def part2(data: Seq[String]): Int = {
@@ -43,16 +42,16 @@ trait Day4 {
     val sleeps = shifts(guardId).sleeps
     val maxMinute = sleeps.max
     val minute = sleeps.indexWhere(_ == maxMinute)
-    guardId * minute
+    guardId.fold(0)(_ * minute)
   }
 
-  def getShiftMapWithId(data: Seq[String]): Map[Int, Shift] = {
+  def getShiftMapWithId(data: Seq[String]): Map[Option[Int], Shift] = {
     import cats.Monoid
     import cats.implicits._
 
     implicit val shiftMonoid: Monoid[Shift] = new Monoid[Shift] {
-      override def empty: Shift = Shift(0, new Array[Int](60))
-      override def combine(x: Shift, y: Shift): Shift = Shift(x.id, x.sleeps.zip(y.sleeps).map {case (a, b) => a + b})
+      override def empty: Shift = Shift(None, new Array[Int](60))
+      override def combine(x: Shift, y: Shift): Shift = Shift(None, x.sleeps.zip(y.sleeps).map {case (a, b) => a + b})
     }
 
     val shiftsWithDate: Map[LocalDate, Shift] = data.map(parseLine)
@@ -93,7 +92,7 @@ trait Day4 {
       case WakeUp => acc.slice(0, l.date.getMinute) ++ acc.slice(l.date.getMinute, 60).map(_ => 0)
     })
 
-    Shift(log.find(_.event == BeginShift).map(_.id).getOrElse(0), array)
+    Shift(log.find(_.event == BeginShift).map(_.id), array)
   }
 }
 

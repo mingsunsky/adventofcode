@@ -48,7 +48,7 @@ class Day4Spec extends WordSpec with Matchers {
       }.toArray
 
       val shift = getShift(events)
-      shift.id shouldBe 10
+      shift.id shouldBe Some(10)
       shift.sleeps shouldBe expectedArr
     }
   }
@@ -64,7 +64,7 @@ class Day4Spec extends WordSpec with Matchers {
     }.toArray
 
     val shift = getShift(events)
-    shift.id shouldBe 99
+    shift.id shouldBe Some(99)
     shift.sleeps shouldBe expectedArr
   }
 
