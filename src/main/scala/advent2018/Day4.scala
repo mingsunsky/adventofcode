@@ -22,12 +22,31 @@ object Day4Solution extends Day4 with App {
 
 
   //Part2
-//  println(part2(data))
+  println(part2(data))
 }
 
 
 trait Day4 {
   def part1(data: Seq[String]): Int = {
+
+    val shifts = getShiftMapWithId(data)
+    val guardId = shifts.mapValues(_.sleeps.sum).maxBy(_._2)._1
+    val sleeps = shifts(guardId).sleeps
+    val maxMinute = sleeps.max
+    val minute = sleeps.indexWhere(_ == maxMinute)
+    guardId * minute
+  }
+
+  def part2(data: Seq[String]): Int = {
+    val shifts = getShiftMapWithId(data)
+    val guardId = shifts.mapValues(_.sleeps.max).maxBy(_._2)._1
+    val sleeps = shifts(guardId).sleeps
+    val maxMinute = sleeps.max
+    val minute = sleeps.indexWhere(_ == maxMinute)
+    guardId * minute
+  }
+
+  def getShiftMapWithId(data: Seq[String]): Map[Int, Shift] = {
     import cats.Monoid
     import cats.implicits._
 
@@ -42,17 +61,10 @@ trait Day4 {
       .groupBy(_.date.toLocalDate)
       .mapValues(getShift _)
 
-    val shifts = shiftsWithDate
+    shiftsWithDate
       .values
       .groupBy(_.id)
       .mapValues(_.toList.combineAll)
-
-    val guardId = shifts.mapValues(_.sleeps.sum).maxBy(_._2)._1
-    val sleeps = shifts(guardId).sleeps
-    val maxMinute = sleeps.max
-    val minute = sleeps.indexWhere(_ == maxMinute)
-
-    guardId * minute
   }
 
   val pattern1 = """^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] Guard #(\d{1,4}) (.+)$""".r
