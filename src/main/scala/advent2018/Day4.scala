@@ -1,8 +1,6 @@
 package advent2018
 import java.time.{LocalDate, LocalDateTime}
 
-import com.sun.net.httpserver.Authenticator.Failure
-
 import scala.io.Source
 
 sealed trait Event { val value: String }
@@ -12,12 +10,14 @@ case object WakeUp extends Event {val value = "wakes up"}
 
 case class EventLog (date: LocalDateTime, id: Int, event: Event)
 
-case class Shift (id: Int, sleeps: Array[Int])
+case class Shift (id: Int, sleeps: Array[Int]) {
+  override def toString: String = s"$id " + sleeps.mkString
+}
 
-object Day4 extends Day4 with App {
+object Day4Solution extends Day4 with App {
 
   //Part1
-  val data = Source.fromResource("Day1").getLines().toSeq
+  val data = Source.fromResource("Day4").getLines().toSeq
   println(part1(data))
 
 
@@ -36,23 +36,24 @@ trait Day4 {
       override def combine(x: Shift, y: Shift): Shift = Shift(x.id, x.sleeps.zip(y.sleeps).map {case (a, b) => a + b})
     }
 
-    val log: Map[Int, Iterable[Shift]] = data.map(parseLine)
+    val shiftsWithDate: Map[LocalDate, Shift] = data.map(parseLine)
       .map(fixEventDate)
       .sortWith {case (a, b) => a.date.compareTo(b.date) < 0 }
       .groupBy(_.date.toLocalDate)
       .mapValues(getShift _)
+
+    val shifts = shiftsWithDate
       .values
       .groupBy(_.id)
+      .mapValues(_.toList.combineAll)
 
-    val shifts: Map[Int, Shift] = log.mapValues(_.combineAll)
+    val guardId = shifts.mapValues(_.sleeps.sum).maxBy(_._2)._1
+    val sleeps = shifts(guardId).sleeps
+    val maxMinute = sleeps.max
+    val minute = sleeps.indexWhere(_ == maxMinute)
 
-    shifts.mapValues(_.sleeps.sum)
-      .max
-      ._1
+    guardId * minute
   }
-
-//    [1518-05-30 00:04] Guard #2417 begins shift
-//    [1518-10-20 00:48] wakes up
 
   val pattern1 = """^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] Guard #(\d{1,4}) (.+)$""".r
   val pattern2 = "^\\[([0-9]+)-([0-9]+)-([0-9]+) ([0-9]+):([0-9]+)\\] (.+)$".r
