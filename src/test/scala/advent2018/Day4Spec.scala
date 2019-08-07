@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter
 import org.scalatest.{Matchers, WordSpec}
 import Day4Solution._
 
+import scala.io.Source
+
 class Day4Spec extends WordSpec with Matchers {
 
   val datePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -15,21 +17,21 @@ class Day4Spec extends WordSpec with Matchers {
     "parse begins shift" in {
       val result = parseLine("[1518-05-30 00:04] Guard #2417 begins shift")
       result.date shouldEqual LocalDateTime.of(1518, 5, 30, 0, 4)
-      result.id shouldEqual 2417
+      result.id shouldEqual Some(2417)
       result.event shouldEqual BeginShift
     }
 
     "parse wakes up" in {
       val result = parseLine("[1518-10-20 00:48] wakes up")
       result.date shouldEqual LocalDateTime.of(1518, 10, 20, 0, 48)
-      result.id shouldEqual 0
+      result.id shouldEqual None
       result.event shouldEqual WakeUp
     }
 
     "parse falls sleep" in {
       val result = parseLine("[1518-08-12 00:14] falls asleep")
       result.date shouldEqual LocalDateTime.of(1518, 8, 12, 0, 14)
-      result.id shouldEqual 0
+      result.id shouldEqual None
       result.event shouldEqual FallSleep
     }
   }
@@ -72,20 +74,20 @@ class Day4Spec extends WordSpec with Matchers {
   "part1 fixDate" should {
     "return same date when shift start at 00:00" in {
       val date = parseDate("1518-05-30 00:04")
-      val log = EventLog(date, 10, BeginShift)
+      val log = EventLog(date, Some(10), BeginShift)
       fixEventDate(log) shouldBe log
     }
 
     "return next day at 00:00 when shift start at 23pm" in {
       val date = parseDate("1518-05-29 23:54")
-      val log = EventLog(date, 10, BeginShift)
-      val expectedLog = EventLog(parseDate("1518-05-30 00:00"), 10, BeginShift)
+      val log = EventLog(date, Some(10), BeginShift)
+      val expectedLog = EventLog(parseDate("1518-05-30 00:00"), Some(10), BeginShift)
       fixEventDate(log) shouldBe expectedLog
     }
 
     "return same date when not shift start" in {
       val date = parseDate("1518-05-30 00:54")
-      val log = EventLog(date, 10, WakeUp)
+      val log = EventLog(date, Some(10), WakeUp)
       fixEventDate(log) shouldBe log
     }
   }
@@ -135,6 +137,16 @@ class Day4Spec extends WordSpec with Matchers {
                      |[1518-11-05 00:55] wakes up""".stripMargin.split("\n")
 
       part2(events) shouldBe 4455
+    }
+  }
+
+  "soluction" should {
+    "return correct part1" in {
+      part1(Source.fromResource("Day4").getLines().toSeq) shouldBe 12504
+    }
+
+    "return correct part2" in {
+      part2(Source.fromResource("Day4").getLines().toSeq) shouldBe 139543
     }
   }
 }

@@ -1,4 +1,5 @@
 package advent2018
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
 import scala.io.Source
@@ -8,7 +9,7 @@ case object BeginShift extends Event { val value = "begins shift"}
 case object FallSleep extends Event { val value = "falls asleep"}
 case object WakeUp extends Event {val value = "wakes up"}
 
-case class EventLog (date: LocalDateTime, id: Int, event: Event)
+case class EventLog (date: LocalDateTime, id: Option[Int], event: Event)
 
 case class Shift (id: Option[Int], sleeps: Array[Int]) {
   override def toString: String = s"$id " + sleeps.mkString
@@ -29,7 +30,7 @@ trait Day4 {
   def part1(data: Seq[String]): Int = {
 
     val shifts = getShiftMapWithId(data)
-    val guardId = shifts.mapValues(_.sleeps.sum).maxBy(_._2)._1
+    val (guardId, _) = shifts.mapValues(_.sleeps.sum).maxBy(_._2)
     val sleeps = shifts(guardId).sleeps
     val maxMinute = sleeps.max
     val minute = sleeps.indexWhere(_ == maxMinute)
@@ -56,7 +57,7 @@ trait Day4 {
 
     val shiftsWithDate: Map[LocalDate, Shift] = data.map(parseLine)
       .map(fixEventDate)
-      .sortWith {case (a, b) => a.date.compareTo(b.date) < 0 }
+      .sorted(Ordering.fromLessThan[EventLog]((a, b) => a.date isBefore b.date))
       .groupBy(_.date.toLocalDate)
       .mapValues(getShift _)
 
@@ -66,11 +67,12 @@ trait Day4 {
       .mapValues(_.toList.combineAll)
   }
 
-  val pattern1 = """^\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] Guard #(\d{1,4}) (.+)$""".r
-  val pattern2 = "^\\[([0-9]+)-([0-9]+)-([0-9]+) ([0-9]+):([0-9]+)\\] (.+)$".r
+  val pattern1 = """^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] Guard #(\d{1,4}) (.+)$""".r
+  val pattern2 = """^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] (.+)$""".r
+  val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
   def parseLine(line: String): EventLog = line match {
-    case pattern1(y, m, d, h, mm, id, e) => EventLog(LocalDateTime.of(y.toInt, m.toInt, d.toInt, h.toInt, mm.toInt), id.toInt, matchEvent(e))
-    case pattern2(y, m, d, h, mm, e) => EventLog(LocalDateTime.of(y.toInt, m.toInt, d.toInt, h.toInt, mm.toInt), 0, matchEvent(e))
+    case pattern1(d, id, e) => EventLog(LocalDateTime.parse(d, dateFormat), Some(id.toInt), matchEvent(e))
+    case pattern2(d, e) => EventLog(LocalDateTime.parse(d, dateFormat), None, matchEvent(e))
   }
 
   private def matchEvent(event: String): Event = event match {
@@ -92,7 +94,7 @@ trait Day4 {
       case WakeUp => acc.slice(0, l.date.getMinute) ++ acc.slice(l.date.getMinute, 60).map(_ => 0)
     })
 
-    Shift(log.find(_.event == BeginShift).map(_.id), array)
+    Shift(log.find(_.event == BeginShift).flatMap(_.id), array)
   }
 }
 
